@@ -30,7 +30,11 @@ const stateContent = `import getters from './getters';
 import actions from './actions';
 import mutations from './mutations';
 
-const state = {};
+const state = {
+  fetching: false,
+  error: false,
+  beers: [],
+};
 
 export default {
   state,
@@ -39,6 +43,51 @@ export default {
   mutations
 };
 `;
+
+const actionContent = `import beerapi from '@/api/beer'
+
+// Empty as helper
+const stripEmpty = obj => Object
+  .entries(obj)
+  .reduce((stripped, [key, value]) => {
+    if (!!value) {
+      stripped[key] = value
+    }
+    return stripped
+  }, {})
+
+export default {
+  fetchBeers ({ commit, state }, params = {}) {
+    commit('FETCH_BEERS_PENDING')
+    beerapi.beers(stripEmpty(params)).then(beers => {
+      commit('FETCH_BEERS_SUCCESS', beers.body)
+    }).catch(() => {
+      commit('FETCH_BEERS_FAIL')
+    })
+  },
+};
+`;
+
+const mutationsContent = `// import * as types from '@/store/types';
+
+export default {
+  FETCH_BEERS_SUCCESS (state, beers) {
+    state.fetching = false
+    state.beers = beers
+  },
+
+  FETCH_BEERS_PENDING (state) {
+    state.error = false
+    state.fetching = true
+  },
+
+  FETCH_BEERS_FAIL (state) {
+    state.error = true
+    state.fetching = false
+  },
+};
+`;
+
 const exportFileContent = `import * as types from '@/store/types';
 
 export default {
@@ -54,7 +103,7 @@ const mutationsPath = `${path.join(modulePath, 'mutations.js')}`
 fs.mkdirSync(modulePath);
 fs.appendFileSync(statePath, stateContent);
 fs.appendFileSync(gettersPath, exportFileContent);
-fs.appendFileSync(actionsPath, exportFileContent);
-fs.appendFileSync(mutationsPath, exportFileContent);
+fs.appendFileSync(actionsPath, actionContent);
+fs.appendFileSync(mutationsPath, mutationsContent);
 
 success('Module', moduleName, 'generated!');

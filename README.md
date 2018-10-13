@@ -35,13 +35,7 @@ yarn run test:unit
 ### Run Module generate
 ```
 cd setup
-node generateVuexModule.js youModeleName
-```
-
-### Run Component generate
-```
-cd setup
-node generateComponent.js youComponentName
+node generateVuexModule.js beersMod, node generateVuexComponent.js BeersList, node generateComponent.js beersComponent
 ```
 
 ### Run setup cli
